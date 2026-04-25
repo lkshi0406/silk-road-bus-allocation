@@ -1,0 +1,8 @@
+streamlit
+folium
+plotly
+numpy
+pandas
+xgboost
+shap
+ortools

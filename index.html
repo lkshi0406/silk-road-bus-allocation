@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BusIQ | Public Transport Control Room</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050816;
+      --bg-2: #091126;
+      --panel: rgba(12, 18, 36, 0.72);
+      --panel-strong: rgba(10, 15, 30, 0.9);
+      --line: rgba(148, 197, 255, 0.14);
+      --text: #edf4ff;
+      --muted: #8fa2c7;
+      --cyan: #45f2ff;
+      --blue: #63a8ff;
+      --green: #61ff8f;
+      --amber: #ffba5c;
+      --orange: #ff7a45;
+      --red: #ff4d67;
+      --violet: #8f7bff;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(69, 242, 255, 0.14), transparent 24%),
+        radial-gradient(circle at 80% 15%, rgba(143, 123, 255, 0.18), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(255, 122, 69, 0.13), transparent 28%),
+        linear-gradient(160deg, #04060e 0%, #06101f 52%, #03050b 100%);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(circle at center, rgba(0,0,0,0.9), transparent 88%);
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    .frame {
+      width: 100vw;
+      height: 100vh;
+      padding: 22px;
+    }
+
+    .dashboard {
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(148, 197, 255, 0.12);
+      border-radius: 32px;
+      background: linear-gradient(180deg, rgba(7, 11, 24, 0.72), rgba(5, 8, 16, 0.92));
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px) saturate(150%);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .dashboard::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(140deg, rgba(69, 242, 255, 0.04), transparent 30%, transparent 70%, rgba(255, 77, 103, 0.05));
+      pointer-events: none;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(148, 197, 255, 0.12);
+      background: linear-gradient(180deg, rgba(10, 15, 29, 0.92), rgba(10, 15, 29, 0.56));
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 30%, #7cf5ff, #1e8eff 58%, #0b1230 100%);
+      box-shadow: 0 0 24px rgba(69, 242, 255, 0.45);
+      position: relative;
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 9px 12px;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,0.9);
+      clip-path: polygon(10% 60%, 48% 13%, 88% 42%, 70% 74%, 25% 85%);
+      transform: rotate(-12deg);
+      opacity: 0.9;
+    }
+
+    .brand-mark::after {
+      inset: 14px 16px;
+      border-width: 1px;
+      opacity: 0.45;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font: 700 20px/1.1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .top-status {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      flex: 1;
+      margin: 0 22px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 197, 255, 0.16);
+      background: rgba(11, 18, 37, 0.7);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.03em;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 16px rgba(69, 242, 255, 0.9);
+    }
+
+    .status-dot.green { background: var(--green); box-shadow: 0 0 16px rgba(97, 255, 143, 0.9); }
+    .status-dot.amber { background: var(--amber); box-shadow: 0 0 16px rgba(255, 186, 92, 0.95); }
+
+    .replay {
+      min-width: 300px;
+      max-width: 360px;
+      width: 100%;
+      display: grid;
+      gap: 8px;
+    }
+
+    .replay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    input[type="range"] {
+      appearance: none;
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(69,242,255,0.2), rgba(255, 77, 103, 0.24));
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff, #6af7ff 35%, #1f80ff 78%);
+      box-shadow: 0 0 20px rgba(69, 242, 255, 0.8);
+      border: 0;
+    }
+
+    .main {
+      height: calc(100% - 82px);
+      display: grid;
+      grid-template-columns: 1.1fr 0.92fr 0.78fr;
+      grid-template-rows: 1fr 280px;
+      gap: 16px;
+      padding: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel {
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(14, 20, 41, 0.8), rgba(8, 13, 24, 0.88));
+      border: 1px solid rgba(148, 197, 255, 0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 18px 45px rgba(0,0,0,0.38);
+      overflow: hidden;
+      position: relative;
+      min-height: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid rgba(148, 197, 255, 0.1);
+    }
+
+    .panel-title {
+      margin: 0;
+      font: 700 14px/1.1 "Space Grotesk", sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .panel-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: rgba(69, 242, 255, 0.08);
+      color: #9fefff;
+      border: 1px solid rgba(69, 242, 255, 0.18);
+    }
+
+    .left-panel {
+      grid-column: 1;
+      grid-row: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .map-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background:
+        radial-gradient(circle at 56% 36%, rgba(255, 121, 69, 0.2), transparent 12%),
+        radial-gradient(circle at 50% 50%, rgba(255, 77, 103, 0.17), transparent 28%),
+        linear-gradient(180deg, rgba(4, 9, 19, 0.3), rgba(6, 10, 19, 0.8));
+    }
+
+    .map-labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      font-size: 11px;
+      color: rgba(234, 243, 255, 0.72);
+    }
+
+    .map-label {
+      position: absolute;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(6, 11, 24, 0.82);
+      border: 1px solid rgba(148, 197, 255, 0.16);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.28);
+      backdrop-filter: blur(12px);
+    }
+
+    .map-legend {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      display: grid;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(4, 8, 18, 0.8);
+      border: 1px solid rgba(148, 197, 255, 0.12);
+      backdrop-filter: blur(10px);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .swatch.red { background: var(--red); box-shadow: 0 0 10px rgba(255, 77, 103, 0.7); }
+    .swatch.orange { background: var(--orange); box-shadow: 0 0 10px rgba(255, 122, 69, 0.7); }
+    .swatch.cyan { background: var(--cyan); box-shadow: 0 0 10px rgba(69, 242, 255, 0.7); }
+
+    .bus {
+      animation: drift 8s linear infinite;
+      transform-origin: center;
+      filter: drop-shadow(0 0 10px rgba(69, 242, 255, 0.55));
+    }
+
+    .bus.b2 { animation-duration: 11s; animation-delay: -4s; }
+    .bus.b3 { animation-duration: 14s; animation-delay: -7s; }
+    .pulse {
+      animation: pulse 2.4s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .center-panel {
+      grid-column: 2;
+      grid-row: 1;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 14px;
+    }
+
+    .surge-card {
+      margin: 16px;
+      border-radius: 28px;
+      padding: 22px;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255, 77, 103, 0.16), transparent 30%),
+        linear-gradient(145deg, rgba(23, 14, 18, 0.96), rgba(10, 16, 30, 0.96));
+      border: 1px solid rgba(255, 77, 103, 0.24);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(255, 77, 103, 0.08), 0 22px 45px rgba(0,0,0,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .surge-card::before {
+      content: "";
+      position: absolute;
+      inset: -60px;
+      background: radial-gradient(circle, rgba(255, 77, 103, 0.17), transparent 45%);
+      animation: glow 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .surge-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .warning {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255, 77, 103, 0.12);
+      border: 1px solid rgba(255, 77, 103, 0.26);
+      color: #ffc5d0;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .surge-value {
+      margin: 18px 0 8px;
+      font: 800 58px/0.92 "Space Grotesk", sans-serif;
+      letter-spacing: -0.05em;
+      text-shadow: 0 0 24px rgba(255, 77, 103, 0.34);
+    }
+
+    .surge-value small {
+      font-size: 20px;
+      color: #ffc3cd;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .surge-caption {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+      max-width: 42ch;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #f1f6ff;
+      font-size: 12px;
+    }
+
+    .tag span {
+      color: #ffb4be;
+      font-weight: 700;
+    }
+
+    .prediction-band {
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      padding: 16px;
+    }
+
+    .band-labels {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .band-track {
+      height: 72px;
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04)),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 22px);
+      border: 1px solid rgba(148, 197, 255, 0.1);
+    }
+
+    .band-fill {
+      position: absolute;
+      left: 12%;
+      right: 16%;
+      top: 22px;
+      height: 26px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255, 77, 103, 0.15), rgba(255, 186, 92, 0.45), rgba(97, 255, 143, 0.25));
+      box-shadow: 0 0 22px rgba(255, 122, 69, 0.35);
+      opacity: 0.94;
+    }
+
+    .band-core {
+      position: absolute;
+      left: 24%;
+      right: 28%;
+      top: 17px;
+      height: 36px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255, 77, 103, 0.55), rgba(255, 186, 92, 0.9), rgba(255, 77, 103, 0.48));
+      filter: blur(6px);
+      opacity: 0.9;
+    }
+
+    .band-point {
+      position: absolute;
+      top: 26px;
+      left: 52%;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.14), 0 0 24px rgba(255,255,255,0.35);
+    }
+
+    .band-point::after {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.42);
+      opacity: 0.6;
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    .confidence {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .confidence strong {
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .right-panel {
+      grid-column: 3;
+      grid-row: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dispatch-body {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .dispatch-id {
+      font: 700 26px/1.1 "Space Grotesk", sans-serif;
+      letter-spacing: -0.04em;
+      margin: 0;
+    }
+
+    .dispatch-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .metric-row strong { color: var(--text); }
+
+    .bar {
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      border: 1px solid rgba(148, 197, 255, 0.1);
+    }
+
+    .bar > i {
+      display: block;
+      width: 78%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #1ed8ff, #65ff9b 45%, #ffb94c 70%, #ff5f77 100%);
+      box-shadow: 0 0 24px rgba(69, 242, 255, 0.45);
+    }
+
+    .action-row {
+      display: grid;
+      gap: 10px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      padding: 15px 16px;
+      font: 700 14px/1 "Inter", sans-serif;
+      cursor: pointer;
+      color: #09101b;
+      transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.04); }
+
+    .btn.primary {
+      color: #051018;
+      background: linear-gradient(135deg, #63f7ff, #66b2ff 46%, #5dff96);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.14), 0 12px 28px rgba(73, 237, 255, 0.34), 0 0 34px rgba(73, 237, 255, 0.28);
+    }
+
+    .btn.primary::before {
+      content: "";
+      position: absolute;
+      inset: -30% -40%;
+      background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.45), transparent 60%);
+      transform: translateX(-45%);
+      animation: sweep 4s ease-in-out infinite;
+    }
+
+    .btn.secondary {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(148, 197, 255, 0.14);
+    }
+
+    .mini-card {
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(148, 197, 255, 0.1);
+    }
+
+    .bottom-panel {
+      grid-column: 1 / 4;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 16px;
+    }
+
+    .graph-area {
+      padding: 16px 18px 18px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+    }
+
+    .graph-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .graph-legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(148, 197, 255, 0.1);
+    }
+
+    .legend-line {
+      width: 18px;
+      height: 0;
+      border-top: 3px solid currentColor;
+      border-radius: 999px;
+    }
+
+    .legend-line.blue { color: #66b8ff; }
+    .legend-line.green { color: #60ffa0; }
+
+    .chart {
+      position: relative;
+      min-height: 0;
+      border-radius: 22px;
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(8, 13, 25, 0.62), rgba(8, 13, 25, 0.82));
+      border: 1px solid rgba(148, 197, 255, 0.1);
+    }
+
+    .chart svg { width: 100%; height: 100%; display: block; }
+
+    .timeline {
+      padding: 16px 18px 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .timeline-track {
+      position: relative;
+      display: grid;
+      gap: 14px;
+      padding-left: 12px;
+      border-left: 1px solid rgba(148, 197, 255, 0.18);
+    }
+
+    .timeline-item {
+      display: grid;
+      gap: 4px;
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -6px;
+      top: 3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #63f7ff, #68ff98);
+      box-shadow: 0 0 16px rgba(69, 242, 255, 0.55);
+    }
+
+    .timeline-item strong {
+      font-size: 13px;
+      letter-spacing: 0.03em;
+    }
+
+    .timeline-item span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+      flex: 0 0 auto;
+      vertical-align: middle;
+    }
+
+    .muted { color: var(--muted); }
+
+    @keyframes drift {
+      0% { transform: translateX(0) translateY(0); }
+      25% { transform: translateX(1.8%) translateY(-0.6%); }
+      50% { transform: translateX(0.2%) translateY(0.8%); }
+      75% { transform: translateX(-1.3%) translateY(-0.3%); }
+      100% { transform: translateX(0) translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.92); opacity: 0.55; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+
+    @keyframes glow {
+      0%, 100% { transform: scale(0.95); opacity: 0.5; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+
+    @keyframes sweep {
+      0%, 18% { transform: translateX(-44%) rotate(0.001deg); opacity: 0; }
+      28% { opacity: 1; }
+      48% { transform: translateX(42%) rotate(0.001deg); opacity: 0; }
+      100% { transform: translateX(42%) rotate(0.001deg); opacity: 0; }
+    }
+
+    @media (max-width: 1320px) {
+      body { overflow: auto; }
+      .frame { height: auto; min-height: 100vh; }
+      .dashboard { height: auto; min-height: calc(100vh - 44px); }
+      .main { grid-template-columns: 1fr; grid-template-rows: auto; height: auto; }
+      .left-panel, .center-panel, .right-panel, .bottom-panel { grid-column: 1; grid-row: auto; }
+      .bottom-panel { grid-template-columns: 1fr; }
+      .panel { min-height: 420px; }
+      .map-wrap { min-height: 560px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <section class="dashboard" aria-label="BusIQ public transport control room dashboard mockup">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div>
+            <h1>BusIQ</h1>
+            <small>AI-powered public transport control room</small>
+          </div>
+        </div>
+
+        <div class="top-status">
+          <div class="status-pill"><span class="status-dot green"></span>Live</div>
+          <div class="status-pill"><span class="status-dot"></span>Data synced</div>
+          <div class="status-pill"><span class="status-dot amber"></span>Model accuracy 94.8%</div>
+          <div class="status-pill"><span class="status-dot"></span>Silk Board junction watch zone</div>
+        </div>
+
+        <div class="replay">
+          <div class="replay-header">
+            <span>Replay simulation</span>
+            <strong id="timeLabel">08:12 AM</strong>
+          </div>
+          <input id="timeSlider" type="range" min="0" max="30" value="12" aria-label="Replay time slider" />
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="panel left-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-title">Live Bengaluru Map</p>
+              <p class="panel-subtitle">Silk Board junction congestion field with active routes</p>
+            </div>
+            <div class="badge">Route density 87%</div>
+          </div>
+
+          <div class="map-wrap">
+            <svg viewBox="0 0 820 650" width="100%" height="100%" preserveAspectRatio="none" aria-label="Stylized map of Bengaluru focused on Silk Board junction">
+              <defs>
+                <filter id="blurHeat">
+                  <feGaussianBlur stdDeviation="24" />
+                </filter>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="6" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <linearGradient id="route" x1="0%" x2="100%">
+                  <stop offset="0%" stop-color="#45f2ff" stop-opacity="0.2" />
+                  <stop offset="55%" stop-color="#45f2ff" stop-opacity="0.9" />
+                  <stop offset="100%" stop-color="#61ff8f" stop-opacity="0.95" />
+                </linearGradient>
+                <linearGradient id="heat" x1="0%" x2="100%">
+                  <stop offset="0%" stop-color="#ff4d67" stop-opacity="0.05" />
+                  <stop offset="50%" stop-color="#ff7a45" stop-opacity="0.5" />
+                  <stop offset="100%" stop-color="#ffb94c" stop-opacity="0.15" />
+                </linearGradient>
+              </defs>
+
+              <rect x="0" y="0" width="820" height="650" fill="transparent" />
+              <g opacity="0.25" stroke="#9db9ff" stroke-width="1.2" fill="none">
+                <path d="M 60 120 C 190 72, 270 82, 360 135 S 560 220, 680 164" />
+                <path d="M 95 245 C 225 190, 325 190, 445 250 S 660 350, 750 325" />
+                <path d="M 75 395 C 180 360, 265 355, 340 395 S 510 490, 690 470" />
+                <path d="M 160 530 C 248 470, 342 450, 440 482 S 620 560, 760 535" />
+                <path d="M 220 60 C 180 150, 190 250, 240 330 S 336 470, 300 592" />
+                <path d="M 512 70 C 460 160, 470 265, 520 340 S 620 505, 590 610" />
+              </g>
+
+              <g opacity="0.14" stroke="#45f2ff" stroke-width="8" stroke-linecap="round">
+                <path d="M 150 160 L 315 220 L 493 252 L 665 215" />
+                <path d="M 120 450 L 285 392 L 420 360 L 610 390" />
+              </g>
+
+              <g filter="url(#blurHeat)" opacity="0.92">
+                <ellipse cx="392" cy="314" rx="130" ry="100" fill="url(#heat)" />
+                <ellipse cx="455" cy="255" rx="82" ry="64" fill="#ff4d67" fill-opacity="0.42" />
+                <ellipse cx="320" cy="350" rx="88" ry="66" fill="#ff7a45" fill-opacity="0.38" />
+              </g>
+
+              <g filter="url(#glow)">
+                <path d="M 140 166 C 240 170, 308 205, 396 240 S 560 285, 660 240" fill="none" stroke="url(#route)" stroke-width="7" stroke-linecap="round" />
+                <path d="M 116 454 C 214 432, 300 415, 384 381 S 588 364, 694 394" fill="none" stroke="url(#route)" stroke-width="7" stroke-linecap="round" />
+                <path d="M 278 120 C 264 220, 274 328, 337 422 S 425 520, 388 596" fill="none" stroke="#8f7bff" stroke-width="5" stroke-linecap="round" stroke-dasharray="10 10" opacity="0.95" />
+              </g>
+
+              <g>
+                <circle cx="396" cy="240" r="22" fill="#ff4d67" fill-opacity="0.95" filter="url(#glow)" />
+                <circle cx="396" cy="240" r="54" fill="none" stroke="#ff4d67" stroke-width="2" opacity="0.55" class="pulse" />
+                <circle cx="396" cy="240" r="80" fill="none" stroke="#ffba5c" stroke-width="1.4" opacity="0.35" class="pulse" />
+                <circle cx="396" cy="240" r="6" fill="#fff" />
+              </g>
+
+              <g class="bus b1" transform="translate(170 165)">
+                <rect x="-11" y="-7" width="22" height="14" rx="5" fill="#45f2ff" />
+                <circle cx="-5" cy="8" r="2" fill="#fff" /><circle cx="5" cy="8" r="2" fill="#fff" />
+              </g>
+              <g class="bus b2" transform="translate(268 402)">
+                <rect x="-11" y="-7" width="22" height="14" rx="5" fill="#61ff8f" />
+                <circle cx="-5" cy="8" r="2" fill="#fff" /><circle cx="5" cy="8" r="2" fill="#fff" />
+              </g>
+              <g class="bus b3" transform="translate(561 267)">
+                <rect x="-11" y="-7" width="22" height="14" rx="5" fill="#ffba5c" />
+                <circle cx="-5" cy="8" r="2" fill="#fff" /><circle cx="5" cy="8" r="2" fill="#fff" />
+              </g>
+
+              <g fill="#d8e6ff" opacity="0.95" font-family="Inter, sans-serif" font-size="13">
+                <text x="90" y="118">Yeshwanthpur</text>
+                <text x="238" y="79">Hebbal</text>
+                <text x="632" y="130">KR Puram</text>
+                <text x="644" y="518">Electronic City</text>
+                <text x="118" y="545">Mysuru Rd</text>
+              </g>
+            </svg>
+
+            <div class="map-labels">
+              <div class="map-label" style="left: 58%; top: 29%;">Silk Board Junction</div>
+              <div class="map-label" style="left: 33%; top: 55%;">High congestion corridor</div>
+              <div class="map-label" style="left: 70%; top: 22%;">Route 375E active</div>
+              <div class="map-label" style="left: 14%; top: 76%;">Fallback bus staging area</div>
+            </div>
+
+            <div class="map-legend">
+              <div class="legend-row"><span class="swatch cyan"></span>Scheduled route</div>
+              <div class="legend-row"><span class="swatch orange"></span>Traffic pressure</div>
+              <div class="legend-row"><span class="swatch red"></span>Critical heat zone</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel center-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-title">Surge Alert Card</p>
+              <p class="panel-subtitle">Mission-critical passenger demand prediction</p>
+            </div>
+            <div class="badge">Next 20 min</div>
+          </div>
+
+          <article class="surge-card">
+            <div class="surge-top">
+              <div>
+                <div class="warning">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 3 1.8 20h20.4L12 3Z" stroke="currentColor" stroke-width="1.8"/>
+                    <path d="M12 9v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <circle cx="12" cy="17" r="1.2" fill="currentColor"/>
+                  </svg>
+                  Predicted surge escalation
+                </div>
+                <div class="surge-value"><span id="surgeCount">487</span> <small>passengers</small></div>
+                <div class="surge-caption" id="surgeCopy">A fast-building crowd wave is expected near Silk Board due to the combined effect of rainfall, metro disruption, and Monday peak demand.</div>
+              </div>
+              <div class="badge" style="background: rgba(255, 77, 103, 0.12); color: #ffc3cf; border-color: rgba(255, 77, 103, 0.24);">Urgency: High</div>
+            </div>
+
+            <div class="tag-row">
+              <div class="tag"><span>Rain</span> +29%</div>
+              <div class="tag"><span>Monday</span> +38%</div>
+              <div class="tag"><span>Metro Delay</span> +18%</div>
+            </div>
+
+            <div class="prediction-band">
+              <div class="band-labels">
+                <span>Prediction band</span>
+                <span>Confidence interval 91% - 97%</span>
+              </div>
+              <div class="band-track">
+                <div class="band-core"></div>
+                <div class="band-fill"></div>
+                <div class="band-point" style="left: 57%;"></div>
+              </div>
+              <div class="confidence">
+                <span>Low demand</span>
+                <strong>487 ± 56 passengers</strong>
+                <span>High demand</span>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel right-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-title">Recommended Dispatch</p>
+              <p class="panel-subtitle">Best-fit bus assignment for immediate relief</p>
+            </div>
+            <div class="badge">Auto-ranked</div>
+          </div>
+
+          <div class="dispatch-body">
+            <div class="mini-card">
+              <div class="metric-row"><span>Bus ID</span><strong>KA-01-F-2234</strong></div>
+              <div class="metric-row" style="margin-top: 10px;"><span>ETA to stop</span><strong>12 min</strong></div>
+              <div style="margin-top: 10px;">
+                <div class="metric-row"><span>Capacity utilization</span><strong>78%</strong></div>
+                <div class="bar" aria-label="Capacity utilization bar"><i></i></div>
+              </div>
+              <div class="metric-row" style="margin-top: 10px;"><span>Driver shift remaining</span><strong>2h 40m</strong></div>
+            </div>
+
+            <div class="action-row">
+              <button class="btn primary">Approve Dispatch</button>
+              <button class="btn secondary">Override</button>
+            </div>
+
+            <div class="mini-card">
+              <div class="metric-row"><span>Operational note</span><strong>Ready for reroute</strong></div>
+              <div class="panel-subtitle" style="margin-top: 8px;">BusIQ favors this unit because it can reach the surge zone before passenger overflow crosses the critical threshold.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel bottom-panel">
+          <div class="graph-area">
+            <div class="graph-top">
+              <div>
+                <p class="panel-title">Wait Time Comparison</p>
+                <p class="panel-subtitle">Baseline vs BusIQ predicted wait time</p>
+              </div>
+              <div class="graph-legend">
+                <span class="legend-chip"><i class="legend-line blue"></i>Baseline wait time</span>
+                <span class="legend-chip"><i class="legend-line green"></i>BusIQ predicted wait time</span>
+              </div>
+            </div>
+
+            <div class="chart">
+              <svg viewBox="0 0 1040 290" role="img" aria-label="Comparison graph of baseline and BusIQ predicted wait time">
+                <defs>
+                  <linearGradient id="gridFade" x1="0%" x2="100%">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.04" />
+                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="barBlue" x1="0%" x2="100%">
+                    <stop offset="0%" stop-color="#66b8ff" />
+                    <stop offset="100%" stop-color="#45f2ff" />
+                  </linearGradient>
+                  <linearGradient id="barGreen" x1="0%" x2="100%">
+                    <stop offset="0%" stop-color="#60ffa0" />
+                    <stop offset="100%" stop-color="#8cf8c2" />
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="1040" height="290" rx="20" fill="transparent" />
+                <g stroke="url(#gridFade)" stroke-width="1">
+                  <line x1="64" y1="34" x2="1000" y2="34" />
+                  <line x1="64" y1="82" x2="1000" y2="82" />
+                  <line x1="64" y1="130" x2="1000" y2="130" />
+                  <line x1="64" y1="178" x2="1000" y2="178" />
+                  <line x1="64" y1="226" x2="1000" y2="226" />
+                </g>
+                <g fill="#8ea5d6" font-size="12" font-family="Inter, sans-serif">
+                  <text x="14" y="38">24m</text>
+                  <text x="14" y="86">20m</text>
+                  <text x="14" y="134">16m</text>
+                  <text x="14" y="182">12m</text>
+                  <text x="14" y="230">8m</text>
+                </g>
+                <g transform="translate(130 42)">
+                  <rect x="0" y="90" width="254" height="118" rx="18" fill="url(#barBlue)" opacity="0.24" />
+                  <rect x="0" y="90" width="254" height="118" rx="18" fill="none" stroke="#66b8ff" stroke-opacity="0.8" stroke-width="1.4" />
+                  <text x="22" y="76" fill="#d8e6ff" font-size="18" font-family="Space Grotesk, sans-serif">Baseline wait time</text>
+                  <text x="22" y="146" fill="#ffffff" font-size="58" font-weight="700" font-family="Space Grotesk, sans-serif">22</text>
+                  <text x="112" y="146" fill="#9fd4ff" font-size="22" font-family="Inter, sans-serif">min</text>
+                </g>
+                <g transform="translate(582 42)">
+                  <rect x="0" y="170" width="214" height="38" rx="18" fill="url(#barGreen)" opacity="0.9" />
+                  <rect x="0" y="170" width="214" height="38" rx="18" fill="none" stroke="#60ffa0" stroke-opacity="0.9" stroke-width="1.4" />
+                  <text x="22" y="76" fill="#d8e6ff" font-size="18" font-family="Space Grotesk, sans-serif">BusIQ predicted wait time</text>
+                  <text x="22" y="146" fill="#ffffff" font-size="58" font-weight="700" font-family="Space Grotesk, sans-serif">9</text>
+                  <text x="72" y="146" fill="#9fffc6" font-size="22" font-family="Inter, sans-serif">min</text>
+                </g>
+                <path d="M 386 184 C 438 170, 494 156, 546 148" stroke="#6fefff" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="6 8" opacity="0.95" />
+                <text x="444" y="174" fill="#6fefff" font-size="14" font-family="Inter, sans-serif">-59%</text>
+              </svg>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <div>
+              <p class="panel-title">Event Timeline</p>
+              <p class="panel-subtitle">Ingestion → prediction → dispatch → outcome</p>
+            </div>
+            <div class="timeline-track">
+              <div class="timeline-item">
+                <strong>08:00</strong>
+                <span>Ingestion: road sensors, rainfall feed, metro delay alerts, and bus AVL updates enter the model.</span>
+              </div>
+              <div class="timeline-item">
+                <strong>08:08</strong>
+                <span>Prediction: BusIQ flags a sharp crowd build-up around Silk Board and quantifies the surge band.</span>
+              </div>
+              <div class="timeline-item">
+                <strong>08:12</strong>
+                <span>Dispatch: recommended bus is surfaced for approval with the fastest compliant ETA.</span>
+              </div>
+              <div class="timeline-item">
+                <strong>08:27</strong>
+                <span>Outcome: projected wait time drops from 22 minutes to 9 minutes after intervention.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const slider = document.getElementById('timeSlider');
+    const timeLabel = document.getElementById('timeLabel');
+    const surgeCount = document.getElementById('surgeCount');
+    const surgeCopy = document.getElementById('surgeCopy');
+
+    function formatTime(minuteOffset) {
+      const baseMinutes = 8 * 60;
+      const total = baseMinutes + minuteOffset;
+      const hours = Math.floor(total / 60);
+      const minutes = String(total % 60).padStart(2, '0');
+      const suffix = hours >= 12 ? 'PM' : 'AM';
+      const displayHour = ((hours + 11) % 12) + 1;
+      return `${String(displayHour).padStart(2, '0')}:${minutes} ${suffix}`;
+    }
+
+    function updateDashboard(value) {
+      const minuteOffset = Number(value);
+      const demand = 447 + Math.round(minuteOffset * 3 + Math.max(0, minuteOffset - 10) * 2);
+      timeLabel.textContent = formatTime(minuteOffset);
+      surgeCount.textContent = demand.toLocaleString();
+
+      const variant = minuteOffset < 8
+        ? 'Early build-up detected as the first commuter wave consolidates near Silk Board.'
+        : minuteOffset < 18
+          ? 'Demand is accelerating due to metro knock-on effects and rain-induced boarding delays.'
+          : 'Peak pressure is now active; dispatch priority should stay elevated for the next cycle.';
+
+      surgeCopy.textContent = variant;
+    }
+
+    slider.addEventListener('input', (event) => updateDashboard(event.target.value));
+    updateDashboard(slider.value);
+  </script>
+</body>
+</html>
