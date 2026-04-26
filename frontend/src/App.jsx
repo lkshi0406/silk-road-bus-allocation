@@ -610,17 +610,21 @@ export default function App() {
 
       <div className="pt-12 pb-14 h-full">
         <div className="h-full flex">
-          <aside className="w-[280px] border-r border-borderTone bg-panel overflow-y-auto p-3 space-y-4">
+          <aside className="w-[280px] border-r border-borderTone bg-panel overflow-y-auto p-4 space-y-5">
             <SectionTitle title="Fleet Status" />
             {fleet.map((bus) => (
-              <div key={bus.id} className="bg-card rounded-md border border-borderTone p-2.5 space-y-2">
+              <div key={bus.id} className="bg-card rounded-md border border-borderTone p-3 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm">{bus.id}</span>
-                  <span className={`text-[10px] px-2 py-1 rounded border ${statusPill(bus.status)}`}>{bus.status}</span>
+                  <span className="font-mono text-sm font-bold">{bus.id}</span>
+                  <span className={`text-xs px-2 py-1 rounded border ${statusPill(bus.status)}`}>{bus.status}</span>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="h-1.5 rounded-full bg-[#12233b] overflow-hidden">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-textSecondary font-semibold">Shift Remaining</span>
+                    <span className="text-sm font-bold">{bus.shift}%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-[#12233b] overflow-hidden">
                     <div
                       className={`h-full ${
                         bus.shift > 55 ? 'bg-success' : bus.shift > 30 ? 'bg-warning' : 'bg-critical'
@@ -628,17 +632,22 @@ export default function App() {
                       style={{ width: `${bus.shift}%` }}
                     />
                   </div>
-                  <div className="text-[11px] text-textSecondary">Shift remaining {bus.shift}%</div>
                 </div>
 
                 <div>
-                  <div className="text-xs text-textSecondary">Load: {bus.load[0]} / {bus.load[1]}</div>
-                  <div className="h-1.5 rounded-full bg-[#12233b] overflow-hidden mt-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-textSecondary font-semibold">Passenger Load</span>
+                    <span className="text-sm font-bold">{bus.load[0]}/{bus.load[1]}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-[#12233b] overflow-hidden">
                     <div className="h-full bg-accent" style={{ width: `${(bus.load[0] / bus.load[1]) * 100}%` }} />
                   </div>
                 </div>
 
-                <div className="text-xs text-textSecondary font-mono">{bus.distance.toFixed(1)} km away</div>
+                <div className="text-xs text-textSecondary font-mono flex items-center justify-between">
+                  <span>Distance</span>
+                  <span className="font-bold">{bus.distance.toFixed(1)} km</span>
+                </div>
 
                 {bus.status === 'AVAILABLE' ? (
                   <button
@@ -663,7 +672,7 @@ export default function App() {
             </div>
           </aside>
 
-          <main className="flex-1 p-3 grid grid-rows-[360px_1fr] gap-3 min-w-0">
+          <main className="flex-1 p-4 grid grid-rows-[360px_1fr] gap-4 min-w-0">
             <section className="bg-panel border border-borderTone rounded-md p-2.5 relative">
               <div className="absolute top-2 left-2 z-[1000] flex items-center gap-2 bg-panel/90 border border-borderTone rounded px-2 py-1">
                 <select
@@ -734,8 +743,8 @@ export default function App() {
               ) : null}
             </section>
 
-            <section className="bg-panel border border-borderTone rounded-md p-3 flex flex-col min-h-0">
-              <div className="flex items-center justify-between mb-2">
+            <section className="bg-panel border border-borderTone rounded-md p-4 flex flex-col min-h-0">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm font-semibold tracking-wide">DEMAND FORECAST — {selectedStop}</h2>
                   <select
@@ -752,7 +761,7 @@ export default function App() {
                 </div>
                 <span className="text-xs px-2 py-1 border border-success/40 text-success rounded">MODEL MAE: {modelMae.toFixed(1)} pax</span>
               </div>
-              <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px]">
+              <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
                 <span className="px-2 py-1 rounded border border-borderTone text-textSecondary">Rain: {featureInputs.weatherRainMm.toFixed(1)} mm</span>
                 <span className="px-2 py-1 rounded border border-borderTone text-textSecondary">Day: {featureInputs.dayType}</span>
                 <span className="px-2 py-1 rounded border border-borderTone text-textSecondary">Slot: {featureInputs.slotTime}</span>
@@ -793,17 +802,17 @@ export default function App() {
                 </ResponsiveContainer>
               </div>
 
-              <div className="grid grid-cols-13 gap-1 mt-2">
+              <div className="grid grid-cols-13 gap-1.5 mt-4">
                 {chartData.map((d) => {
                   const tone = d.predicted > 300 ? 'bg-critical/30 border-critical/60' : d.predicted > 100 ? 'bg-warning/25 border-warning/50' : 'bg-success/25 border-success/45';
                   const enlarged = d.time === '08:15';
                   return (
                     <div
                       key={d.time}
-                      className={`rounded border px-1 py-1 text-center ${tone} ${enlarged ? 'scale-105 shadow-critical' : ''} transition-transform duration-200`}
+                      className={`rounded border px-2 py-2 text-center ${tone} ${enlarged ? 'scale-105 shadow-critical' : ''} transition-transform duration-200`}
                     >
-                      <div className="text-[10px] text-textSecondary">{d.time}</div>
-                      <div className="text-[11px] font-semibold font-mono">{d.predicted}</div>
+                      <div className="text-xs text-textSecondary font-semibold">{d.time}</div>
+                      <div className="text-sm font-bold font-mono">{d.predicted}</div>
                     </div>
                   );
                 })}
@@ -811,29 +820,34 @@ export default function App() {
             </section>
           </main>
 
-          <aside className="w-[320px] border-l border-borderTone bg-panel p-3 overflow-y-auto space-y-3">
-            <section className="bg-card border border-critical/40 border-l-4 border-l-critical shadow-critical rounded-md p-3 space-y-3">
+          <aside className="w-[320px] border-l border-borderTone bg-panel p-4 overflow-y-auto space-y-4">
+            <section className="bg-card border border-critical/40 border-l-4 border-l-critical shadow-critical rounded-md p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs px-2 py-1 rounded bg-critical/20 text-critical animate-blink">⚠ SURGE ALERT</span>
-                <span className="text-xs px-2 py-1 rounded border border-warning/50 text-warning">
+                <span className="text-xs px-3 py-1 rounded bg-critical/20 text-critical animate-blink font-semibold">⚠ SURGE ALERT</span>
+                <span className="text-xs px-3 py-1 rounded border border-warning/50 text-warning font-mono">
                   {Math.floor(alertSeconds / 60)}:{two(alertSeconds % 60)} lead time
                 </span>
               </div>
 
-              <div>
-                <div className="text-xs text-textSecondary">Stop</div>
-                <div className="text-sm font-semibold">Silk Board Junction</div>
-                <div className="text-critical text-2xl font-bold mt-1">{silkBoardNow?.predicted ?? 487} passengers</div>
-                <div className="text-xs text-textSecondary">08:15 — 08:30</div>
-                <div className="mt-2 text-xs text-textSecondary">Confidence: 81%</div>
-                <div className="h-1.5 rounded-full bg-navy mt-1 overflow-hidden"><div className="h-full bg-success" style={{ width: '81%' }} /></div>
+              <div className="space-y-2">
+                <div className="text-xs text-textSecondary font-semibold uppercase tracking-wide">Stop</div>
+                <div className="text-lg font-bold">Silk Board Junction</div>
+                <div className="text-critical text-4xl font-bold mt-2">{silkBoardNow?.predicted ?? 487}</div>
+                <div className="text-xs text-textSecondary">passengers expected • 08:15 — 08:30</div>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-textSecondary font-semibold">Confidence Level</span>
+                    <span className="text-success font-bold">81%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-navy overflow-hidden"><div className="h-full bg-success" style={{ width: '81%' }} /></div>
+                </div>
                 {silkBoardNow ? (
-                  <div className="text-[11px] text-textSecondary mt-1">Range: {silkBoardNow.lower} - {silkBoardNow.upper}</div>
+                  <div className="text-xs text-textSecondary mt-2">Range: <span className="font-mono font-bold">{silkBoardNow.lower} – {silkBoardNow.upper}</span></div>
                 ) : null}
               </div>
 
-              <div className="bg-navy/35 border border-borderTone rounded-md p-2.5">
-                <div className="text-[11px] uppercase tracking-wider text-textSecondary mb-2">Why This Alert Fired</div>
+              <div className="bg-navy/35 border border-borderTone rounded-md p-3">
+                <div className="text-xs uppercase tracking-wider text-textSecondary mb-3 font-semibold">Why This Alert Fired</div>
                 <ShapBar label="Monday morning peak" value={38} />
                 <ShapBar label="Heavy rainfall" value={29} />
                 <ShapBar label="Metro Line 1 delay" value={18} />
@@ -842,42 +856,41 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="bg-navy/40 border border-borderTone rounded-md p-2.5 space-y-2">
-                <div className="text-[11px] uppercase tracking-wider text-textSecondary">Bus Recommendations (Score Breakdown)</div>
+              <div className="bg-navy/40 border border-borderTone rounded-md p-3 space-y-3">
+                <div className="text-xs uppercase tracking-wider text-textSecondary font-semibold">Bus Recommendations (Score Breakdown)</div>
                 
                 {/* Ranked Bus List */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {busRecommendations.slice(0, 3).map((rec, idx) => (
                     <div 
                       key={rec.bus.id}
-                      className={`rounded border p-2 ${
-                        idx === 0 
-                          ? 'border-accent/70 bg-accent/10' 
-                          : 'border-borderTone/50 bg-navy/20'
-                      }`}
+                      className={`rounded border p-3 ${idx === 0 ? 'border-accent/70 bg-accent/10 ring-1 ring-accent/30' : 'border-borderTone/50 bg-navy/20'}`}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="font-mono text-sm font-bold">{rec.bus.id}</div>
-                        <div className={`text-[10px] px-2 py-0.5 rounded ${
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <div className="font-mono text-sm font-bold">{rec.bus.id}</div>
+                          {idx === 0 && <div className="text-xs text-accent font-semibold mt-0.5">→ Top Recommendation</div>}
+                        </div>
+                        <div className={`text-xs px-2 py-1 rounded font-bold ${
                           rec.score >= 120 
                             ? 'bg-success/30 text-success' 
                             : rec.score >= 100 
                             ? 'bg-warning/30 text-warning'
                             : 'bg-slate-500/30 text-slate-400'
                         }`}>
-                          Score: {Math.round(rec.score)}
+                          {Math.round(rec.score)}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-[11px] text-textSecondary mb-1">
-                        <div>ETA: {Math.round(rec.eta)} min</div>
-                        <div>Shift: {rec.bus.shift}%</div>
-                        <div>Load: {rec.bus.load[0]}/{rec.bus.load[1]}</div>
-                        <div>Status: {rec.bus.status}</div>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-textSecondary mb-2">
+                        <div><span className="text-textSecondary">ETA:</span> <span className="font-bold">{Math.round(rec.eta)} min</span></div>
+                        <div><span className="text-textSecondary">Shift:</span> <span className="font-bold">{rec.bus.shift}%</span></div>
+                        <div><span className="text-textSecondary">Load:</span> <span className="font-bold">{rec.bus.load[0]}/{rec.bus.load[1]}</span></div>
+                        <div><span className="text-textSecondary">Status:</span> <span className="font-bold">{rec.bus.status}</span></div>
                       </div>
 
                       {/* Score Breakdown Bars */}
-                      <div className="space-y-0.5 text-[10px] mb-1">
+                      <div className="space-y-1 text-xs mb-2 border-t border-borderTone/30 pt-2">
                         {rec.reasons.slice(0, 3).map((reason, i) => (
                           <div key={i} className="flex items-center justify-between">
                             <span className="text-textSecondary">{reason.label}</span>
@@ -890,7 +903,7 @@ export default function App() {
 
                       {/* Headway Warning */}
                       {rec.headwayConflict && (
-                        <div className="text-[10px] text-warning bg-warning/15 rounded px-1.5 py-0.5 mb-1">
+                        <div className="text-xs text-warning bg-warning/15 rounded px-2 py-1 mb-2 font-semibold">
                           ⚠ {rec.headwayWarning}
                         </div>
                       )}
@@ -898,11 +911,11 @@ export default function App() {
                       {idx === 0 && (
                         <button
                           onClick={handleApprove}
-                          className={`w-full h-8 rounded text-xs font-bold transition-all duration-200 ${
+                          className={`w-full h-9 rounded text-sm font-bold transition-all duration-200 ${
                             approved ? 'bg-success text-navy' : 'bg-accent hover:bg-accent/90'
                           }`}
                         >
-                          {approved ? '✓ Dispatched' : '✓ Approve'}
+                          {approved ? '✓ Dispatched' : '✓ Approve & Dispatch'}
                         </button>
                       )}
                     </div>
@@ -937,12 +950,12 @@ export default function App() {
               </div>
             </section>
 
-            <section className="space-y-2">
+            <section className="space-y-3">
               <SectionTitle title="Override Outcomes" subtitle="System accuracy when overridden: 84%" />
               {overrideCards.map((card) => (
                 <div
                   key={card.id}
-                  className={`rounded-md border p-2.5 ${
+                  className={`rounded-md border p-3 ${
                     card.tone === 'red'
                       ? 'bg-critical/10 border-critical/30'
                       : card.tone === 'green'
@@ -950,10 +963,10 @@ export default function App() {
                       : 'bg-card border-borderTone'
                   }`}
                 >
-                  <div className="text-xs text-textPrimary">{card.title}</div>
-                  {card.stats ? <div className="text-[11px] text-textSecondary mt-1">{card.stats}</div> : null}
+                  <div className="text-sm font-semibold text-textPrimary">{card.title}</div>
+                  {card.stats ? <div className="text-xs text-textSecondary mt-2">{card.stats}</div> : null}
                   <div
-                    className={`text-[11px] mt-1 inline-flex px-2 py-1 rounded border ${
+                    className={`text-xs mt-2 inline-flex px-2 py-1 rounded border font-semibold ${
                       card.tone === 'red'
                         ? 'text-critical border-critical/50'
                         : card.tone === 'green'
@@ -963,26 +976,26 @@ export default function App() {
                   >
                     {card.badge}
                   </div>
-                  {card.note ? <div className="text-[11px] text-textSecondary mt-1">{card.note}</div> : null}
+                  {card.note ? <div className="text-xs text-textSecondary mt-2">{card.note}</div> : null}
                 </div>
               ))}
             </section>
 
             <section>
               <SectionTitle title="Live Feed" />
-              <div className="rounded-md border border-borderTone bg-card max-h-[250px] overflow-y-auto divide-y divide-borderTone/60">
+              <div className="rounded-md border border-borderTone bg-card max-h-[280px] overflow-y-auto divide-y divide-borderTone/60">
                 {feed.map((event) => (
-                  <div key={event.id} className="h-8 px-2 text-xs flex items-center gap-2 animate-slideFadeIn">
-                    <span>{event.icon}</span>
-                    <span className="text-textSecondary">{event.text}</span>
+                  <div key={event.id} className="px-3 py-2.5 text-sm flex items-start gap-3 animate-slideFadeIn border-b border-borderTone/40 last:border-b-0">
+                    <span className="text-lg flex-shrink-0 mt-0.5">{event.icon}</span>
+                    <span className="text-textSecondary leading-relaxed">{event.text}</span>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="space-y-2">
+            <section className="space-y-3">
               <SectionTitle title="Tools" />
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setShowModelPerf(!showModelPerf)}
                   className="h-9 rounded border border-borderTone bg-card hover:border-accent transition-all duration-200 text-[11px] font-semibold text-textSecondary hover:text-accent"
@@ -1249,21 +1262,21 @@ export default function App() {
         </div>
       )}
 
-      <footer className="h-14 border-t border-borderTone fixed bottom-0 left-0 right-0 bg-panel/95 backdrop-blur px-4 flex items-center justify-between z-40">
-        <div className="flex items-center gap-3 min-w-[420px]">
-          <span className="text-xs text-textSecondary uppercase tracking-wider">Simulation Controls</span>
+      <footer className="h-16 border-t border-borderTone fixed bottom-0 left-0 right-0 bg-panel/95 backdrop-blur px-6 flex items-center justify-between z-40 gap-8">
+        <div className="flex items-center gap-4 min-w-[480px]">
+          <span className="text-xs text-textSecondary uppercase tracking-wider font-bold">Simulation</span>
           <button
             onClick={() => setPlaying((v) => !v)}
-            className="h-8 w-8 rounded border border-borderTone flex items-center justify-center hover:border-accent transition-colors duration-200"
+            className="h-9 w-9 rounded border border-borderTone flex items-center justify-center hover:border-accent transition-colors duration-200"
           >
             {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             {[1, 2, 5].map((s) => (
               <button
                 key={s}
                 onClick={() => setSpeed(s)}
-                className={`h-7 px-2 rounded text-xs border transition-all duration-200 ${
+                className={`h-8 px-3 rounded text-xs border font-semibold transition-all duration-200 ${
                   speed === s ? 'border-accent text-accent bg-accent/10' : 'border-borderTone text-textSecondary'
                 }`}
               >
@@ -1283,25 +1296,25 @@ export default function App() {
             }}
             className="w-56"
           />
-          <span className="text-xs text-textSecondary font-mono">{formatTimeFromMinutes(timelineMinutes)}</span>
+          <span className="text-sm text-textSecondary font-mono font-bold">{formatTimeFromMinutes(timelineMinutes)}</span>
         </div>
 
         <div className="flex items-center gap-8">
-          <Kpi label="MINUTES SAVED TODAY" value={minutesSaved} />
+          <Kpi label="MINUTES SAVED" value={minutesSaved} />
           <Kpi label="PASSENGERS SERVED" value={passengersServed} />
           <Kpi label="DISPATCHES APPROVED" value={dispatchesApproved} />
         </div>
 
-        <div className="flex items-center gap-2 min-w-[400px] justify-end">
+        <div className="flex items-center gap-3 min-w-[480px] justify-end">
           <button
             onClick={() => setShowBaselines(!showBaselines)}
-            className="text-xs px-2 py-1 rounded border border-accent/40 text-accent hover:bg-accent/10 transition-colors duration-200"
+            className="text-xs px-3 py-1.5 rounded border border-accent/40 text-accent hover:bg-accent/10 transition-colors duration-200 font-semibold"
           >
-            📊 BusIQ vs BMTC Comparison
+            📊 BusIQ vs BMTC
           </button>
-          <span className="text-xs text-textSecondary uppercase">Model Performance</span>
-          <span className="text-xs px-2 py-1 rounded border border-success/40 text-success">30-DAY MAE 9.4 pax</span>
-          <span className="text-xs px-2 py-1 rounded border border-accent/40 text-accent">LAST RETRAIN 08:01 AM</span>
+          <span className="text-xs text-textSecondary uppercase font-semibold">Model</span>
+          <span className="text-xs px-3 py-1.5 rounded border border-success/40 text-success font-mono">30-DAY MAE 9.4</span>
+          <span className="text-xs px-3 py-1.5 rounded border border-accent/40 text-accent font-mono">08:01 AM</span>
         </div>
       </footer>
 
@@ -1524,9 +1537,9 @@ export default function App() {
 
 function SectionTitle({ title, subtitle }) {
   return (
-    <div className="space-y-0.5">
-      <div className="text-[11px] uppercase tracking-wider text-textSecondary font-semibold">{title}</div>
-      {subtitle ? <div className="text-[11px] text-textSecondary">{subtitle}</div> : null}
+    <div className="space-y-1">
+      <div className="text-xs uppercase tracking-wider text-textSecondary font-bold">{title}</div>
+      {subtitle ? <div className="text-xs text-textSecondary">{subtitle}</div> : null}
     </div>
   );
 }
@@ -1558,8 +1571,8 @@ function ShapBar({ label, value }) {
 function Kpi({ label, value }) {
   return (
     <div className="text-center">
-      <div className="text-[10px] text-textSecondary tracking-wider">{label}</div>
-      <div className="font-mono text-base font-semibold">{value.toLocaleString()}</div>
+      <div className="text-xs text-textSecondary tracking-wider font-semibold">{label}</div>
+      <div className="font-mono text-lg font-bold mt-1">{value.toLocaleString()}</div>
     </div>
   );
 }
