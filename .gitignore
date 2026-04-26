@@ -30,8 +30,3 @@ Thumbs.db
 
 # Logs
 *.log
-
-# Frontend artifacts
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
