@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BusIQ Dynamic Web App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar glass">
+      <h2>BusIQ Controls</h2>
+      <label>Replay Day
+        <input id="dayIndex" type="range" min="1" max="30" value="12" />
+        <span id="dayLabel">12</span>
+      </label>
+      <label>Replay Hour
+        <select id="hourSelect">
+          <option value="7">07:00</option>
+          <option value="8" selected>08:00</option>
+          <option value="9">09:00</option>
+          <option value="10">10:00</option>
+        </select>
+      </label>
+      <button id="refreshBtn" class="btn primary">Refresh State</button>
+
+      <hr />
+      <h3>SMS Mock</h3>
+      <input id="smsPhone" value="+91 90000 00000" />
+      <textarea id="smsMessage" rows="4"></textarea>
+      <button id="smsBtn" class="btn">Send SMS</button>
+
+      <div id="toast" class="toast"></div>
+    </aside>
+
+    <main class="main-grid">
+      <header class="topbar glass">
+        <div>
+          <h1>BusIQ Dynamic Dashboard</h1>
+          <p id="scopeText">Silk Board-Koramangala, Route 500C</p>
+        </div>
+        <div class="status-row">
+          <span class="pill"><i></i>Live</span>
+          <span class="pill"><i></i>Data Synced</span>
+          <span class="pill"><i></i><span id="acc">--</span>% Accuracy</span>
+        </div>
+      </header>
+
+      <section class="map-card glass">
+        <h3>Corridor Map</h3>
+        <svg id="corridorMap" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      </section>
+
+      <section class="forecast-card glass">
+        <h3>Surge Alert</h3>
+        <div class="big" id="predictionValue">--</div>
+        <div class="meta" id="predictionBand">--</div>
+        <div class="tags">
+          <span id="rainTag"></span>
+          <span id="metroTag"></span>
+          <span id="odTag"></span>
+        </div>
+        <ul id="featureList" class="feature-list"></ul>
+      </section>
+
+      <section class="dispatch-card glass">
+        <h3>Recommended Dispatch</h3>
+        <div id="dispatchCard"></div>
+        <div class="action-row">
+          <button id="approveBtn" class="btn primary">Approve Dispatch</button>
+          <select id="overrideSelect"></select>
+          <input id="overrideReason" value="Operator judgement based on crowd trend and road feed." />
+          <button id="overrideBtn" class="btn danger">Override</button>
+        </div>
+      </section>
+
+      <section class="chart-card glass">
+        <h3>Wait Time Comparison</h3>
+        <canvas id="waitChart"></canvas>
+      </section>
+
+      <section class="chart-card glass">
+        <h3>Learning Curve</h3>
+        <canvas id="learningChart"></canvas>
+      </section>
+
+      <section class="logs-card glass">
+        <h3>Override Outcome Tracker</h3>
+        <table id="overrideTable"><thead><tr><th>Time</th><th>Action</th><th>Outcome</th></tr></thead><tbody></tbody></table>
+      </section>
+
+      <section class="logs-card glass">
+        <h3>SMS Log</h3>
+        <table id="smsTable"><thead><tr><th>Time</th><th>Phone</th><th>Status</th></tr></thead><tbody></tbody></table>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

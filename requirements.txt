@@ -6,3 +6,6 @@ pandas
 xgboost
 shap
 ortools
+fastapi
+uvicorn[standard]
+jinja2
